@@ -44,6 +44,17 @@ public class QuantityMeasurementApp {
             return new QuantityLength(converted, target);
         }
 
+        public QuantityLength add(QuantityLength other) {
+            if (other == null) {
+                throw new IllegalArgumentException("Cannot add null");
+            }
+
+            double sumFeet = this.toFeet() + other.toFeet();
+            double result = this.unit.fromFeet(sumFeet);
+
+            return new QuantityLength(result, this.unit);
+        }
+
         @Override
         public boolean equals(Object obj) {
 
@@ -62,17 +73,24 @@ public class QuantityMeasurementApp {
         }
     }
 
-    static double convert(double value, LengthUnit from, LengthUnit to) {
-        return new QuantityLength(value, from).convertTo(to).value;
-    }
-
     public static void main(String[] args) {
 
-        System.out.println("Feet → Inches: " + convert(1.0, LengthUnit.FEET, LengthUnit.INCH));
-        System.out.println("Yard → Feet: " + convert(3.0, LengthUnit.YARD, LengthUnit.FEET));
-        System.out.println("Inch → Yard: " + convert(36.0, LengthUnit.INCH, LengthUnit.YARD));
-        System.out.println("CM → Inch: " + convert(1.0, LengthUnit.CM, LengthUnit.INCH));
-        System.out.println("Zero Conversion: " + convert(0.0, LengthUnit.FEET, LengthUnit.INCH));
-        System.out.println("Negative Conversion: " + convert(-1.0, LengthUnit.FEET, LengthUnit.INCH));
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCH);
+
+        QuantityLength q3 = new QuantityLength(1.0, LengthUnit.YARD);
+        QuantityLength q4 = new QuantityLength(3.0, LengthUnit.FEET);
+
+        QuantityLength q5 = new QuantityLength(2.54, LengthUnit.CM);
+        QuantityLength q6 = new QuantityLength(1.0, LengthUnit.INCH);
+
+        QuantityLength q7 = new QuantityLength(5.0, LengthUnit.FEET);
+        QuantityLength q8 = new QuantityLength(-2.0, LengthUnit.FEET);
+
+        System.out.println("Feet + Inches: " + q1.add(q2));
+        System.out.println("Yard + Feet: " + q3.add(q4));
+        System.out.println("CM + Inch: " + q5.add(q6));
+        System.out.println("With Zero: " + q7.add(new QuantityLength(0.0, LengthUnit.INCH)));
+        System.out.println("Negative Addition: " + q7.add(q8));
     }
 }
