@@ -15,6 +15,10 @@ public class QuantityMeasurementApp {
         public double toFeet(double value) {
             return value * toFeet;
         }
+
+        public double fromFeet(double value) {
+            return value / toFeet;
+        }
     }
 
     static class QuantityLength {
@@ -23,8 +27,37 @@ public class QuantityMeasurementApp {
         private final LengthUnit unit;
 
         public QuantityLength(double value, LengthUnit unit) {
+            if (!Double.isFinite(value) || unit == null) {
+                throw new IllegalArgumentException("Invalid input");
+            }
             this.value = value;
             this.unit = unit;
+        }
+
+        public double toFeet() {
+            return unit.toFeet(value);
+        }
+
+        public QuantityLength convertTo(LengthUnit target) {
+            double feetValue = this.toFeet();
+            double converted = target.fromFeet(feetValue);
+            return new QuantityLength(converted, target);
+        }
+
+        public QuantityLength add(QuantityLength other) {
+            return add(other, this.unit);
+        }
+
+        public QuantityLength add(QuantityLength other, LengthUnit target) {
+
+            if (other == null || target == null) {
+                throw new IllegalArgumentException("Invalid input");
+            }
+
+            double sumFeet = this.toFeet() + other.toFeet();
+            double result = target.fromFeet(sumFeet);
+
+            return new QuantityLength(result, target);
         }
 
         @Override
@@ -36,32 +69,34 @@ public class QuantityMeasurementApp {
 
             QuantityLength other = (QuantityLength) obj;
 
-            double thisInFeet = this.unit.toFeet(this.value);
-            double otherInFeet = other.unit.toFeet(other.value);
+            return Double.compare(this.toFeet(), other.toFeet()) == 0;
+        }
 
-            return Double.compare(thisInFeet, otherInFeet) == 0;
+        @Override
+        public String toString() {
+            return value + " " + unit;
         }
     }
 
     public static void main(String[] args) {
 
-        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.YARD);
-        QuantityLength q2 = new QuantityLength(3.0, LengthUnit.FEET);
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCH);
 
         QuantityLength q3 = new QuantityLength(1.0, LengthUnit.YARD);
-        QuantityLength q4 = new QuantityLength(36.0, LengthUnit.INCH);
+        QuantityLength q4 = new QuantityLength(3.0, LengthUnit.FEET);
 
-        QuantityLength q5 = new QuantityLength(1.0, LengthUnit.CM);
-        QuantityLength q6 = new QuantityLength(0.393701, LengthUnit.INCH);
+        QuantityLength q5 = new QuantityLength(36.0, LengthUnit.INCH);
+        QuantityLength q6 = new QuantityLength(1.0, LengthUnit.YARD);
 
-        QuantityLength q7 = new QuantityLength(2.0, LengthUnit.YARD);
-        QuantityLength q8 = new QuantityLength(2.0, LengthUnit.YARD);
+        QuantityLength q7 = new QuantityLength(2.54, LengthUnit.CM);
+        QuantityLength q8 = new QuantityLength(1.0, LengthUnit.INCH);
 
-        System.out.println("Yard to Feet: " + q1.equals(q2));
-        System.out.println("Yard to Inch: " + q3.equals(q4));
-        System.out.println("CM to Inch: " + q5.equals(q6));
-        System.out.println("Same Yard Value: " + q7.equals(q8));
-        System.out.println("Null Comparison: " + q1.equals(null));
-        System.out.println("Same Reference: " + q1.equals(q1));
+        System.out.println("Feet target: " + q1.add(q2, LengthUnit.FEET));
+        System.out.println("Inch target: " + q1.add(q2, LengthUnit.INCH));
+        System.out.println("Yard target: " + q1.add(q2, LengthUnit.YARD));
+        System.out.println("Yard + Feet: " + q3.add(q4, LengthUnit.YARD));
+        System.out.println("Inch + Yard → Feet: " + q5.add(q6, LengthUnit.FEET));
+        System.out.println("CM + Inch: " + q7.add(q8, LengthUnit.CM));
     }
 }
